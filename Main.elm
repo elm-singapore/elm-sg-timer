@@ -111,21 +111,52 @@ updateSetup msg model =
 
 type RunningMsg
     = Tick Time
-    | ChangeUser
-    | RunningEnd
 
 
 updateRunning : Time -> RunningMsg -> Model -> ( Model, Cmd Msg )
 updateRunning startTime msg model =
     case msg of
         Tick time ->
-            ( model, Cmd.none )
+            let
+                ( timePerParticipant, remainingTime ) =
+                    ( model.totalTime / toFloat model.totalNbOfParticipants
+                    , model.totalTime - (time - startTime)
+                    )
 
-        ChangeUser ->
-            ( model, Cmd.none )
+                remainingNbOfParticipants =
+                    ceiling (remainingTime / timePerParticipant)
+                        |> clamp 0 model.totalNbOfParticipants
+            in
+                ( { model | remainingNbOfParticipants = remainingNbOfParticipants }
+                , if remainingNbOfParticipants == 0 then
+                    commandWhenRunningEnd
+                  else if remainingNbOfParticipants < model.remainingNbOfParticipants then
+                    commandWhenParticipantChange
+                  else
+                    Cmd.none
+                )
 
-        RunningEnd ->
-            ( model, Cmd.none )
+
+commandWhenParticipantChange : Cmd Msg
+commandWhenParticipantChange =
+    Cmd.none
+
+
+commandWhenRunningEnd : Cmd Msg
+commandWhenRunningEnd =
+    Cmd.none
+
+
+
+-- SUBSCRIPTIONS ###########################################
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    if model.page == PageRunning then
+        every (second / 10) (RunningMsg << Tick)
+    else
+        Sub.none
 
 
 
@@ -135,15 +166,6 @@ updateRunning startTime msg model =
 view : Model -> Html Msg
 view model =
     div [] []
-
-
-
--- SUBSCRIPTIONS ###########################################
-
-
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Sub.none
 
 
 
@@ -165,14 +187,6 @@ subscriptions model =
 -- init : ( Model, Cmd Msg )
 -- init =
 --     ( model, Cmd.none )
---
---
--- subscriptions : Model -> Sub Msg
--- subscriptions model =
---     if model.page == Running then
---         every second Tick
---     else
---         Sub.none
 --
 --
 -- type Page
