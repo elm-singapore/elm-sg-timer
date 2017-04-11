@@ -11,9 +11,10 @@ Pages:
 
 ## Pogression
 
-  1. Create basiv View and Model
-  2. Add update, upgrade to beginnerProgram
-  3. Add subscribtions to get Time events
-  4. InterOp with JS to play alarm.
+  1. Create basiv View and Model (February Meetup)
+  2. Add update, upgrade to beginnerProgram (February Meetup)
+  3. Add subscribtions to get Time events (March Meetup)
+  4. Cleanup and refactor - thanks to @mpizenberg
+  5. InterOp with JS to play alarm.
 
-See the commit history for steps 1 and 2.
+See the commit history to see the progression.
