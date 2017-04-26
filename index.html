@@ -17,12 +17,12 @@
         }
     </style>
     <script src="js/ion.sound.min.js"></script>
-    <script src="elm.js"></script>
+    <script src="Main.js"></script>
 </head>
 
 <body>
     <script type="text/javascript">
-        Elm.Main.fullscreen()
+        var app = Elm.Main.fullscreen()
 
         ion.sound({
             sounds: [{
@@ -30,7 +30,14 @@
             }],
             volume: 1.0,
             path: "sounds/",
-            preload: true
+            preload: true,
+            ended_callback: function(obj) {
+                app.ports.soundEnded.send("Finished");
+            }
+        });
+
+        app.ports.playSound.subscribe(function(sound) {
+            ion.sound.play(sound);
         });
     </script>
 </body>

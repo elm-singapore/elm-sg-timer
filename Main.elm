@@ -1,4 +1,4 @@
-module Main exposing (main)
+port module Main exposing (main)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -14,6 +14,12 @@ main =
         , update = update
         , subscriptions = subscriptions
         }
+
+
+port playSound : String -> Cmd msg
+
+
+port soundEnded : (String -> msg) -> Sub msg
 
 
 
@@ -52,6 +58,7 @@ type Msg
     | SetupMsg SetupMsg
     | ReadyMsg ReadyMsg
     | RunningMsg RunningMsg
+    | EndSound String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -68,6 +75,13 @@ update msg model =
 
         ( RunningMsg runningMsg, Just startTime ) ->
             updateRunning startTime runningMsg model
+
+        ( EndSound endMsg, _ ) ->
+            let
+                _ =
+                    Debug.log "Timer ended" endMsg
+            in
+                ( model, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -163,7 +177,7 @@ updateRunning startTime msg model =
 -}
 commandWhenParticipantChange : Cmd Msg
 commandWhenParticipantChange =
-    Cmd.none
+    playSound "bell_ring"
 
 
 {-| Replace this by whatever we want to do when the timer end
@@ -179,10 +193,14 @@ commandWhenRunningEnd =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    if model.page == PageRunning && model.remainingNbOfParticipants > 0 then
-        every (second / 10) (RunningMsg << Tick)
-    else
-        Sub.none
+    let
+        tSub =
+            if model.page == PageRunning && model.remainingNbOfParticipants > 0 then
+                every (second / 10) (RunningMsg << Tick)
+            else
+                Sub.none
+    in
+        Sub.batch [ tSub, soundEnded EndSound ]
 
 
 
